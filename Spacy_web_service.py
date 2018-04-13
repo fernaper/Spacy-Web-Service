@@ -72,7 +72,7 @@ def get_span():
         #vocab = tree.doc.vocab
         #atr_vocab = {'vocab':[{'strings':vocab.strings.string},{'vectors_length':vocab.length}]}
     
-        # I join all the dictionaries in one
+        # I join all the dictionaries in one    
         full.update(root)
         full.update(atr_start)
         full.update(atr_end)
@@ -144,7 +144,7 @@ def get_tags():
     ans = {}
     for word in list(parse.sents)[0]:
         ans.update({str(word):str(word.tag_)})
-    
+    print(ans)
     return ans if ans != None else {}
 
 @get('/spacy/get_tags')
