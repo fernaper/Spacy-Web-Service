@@ -11,11 +11,15 @@ Web Service that allows to perform all the Natural Language Processing (NLP) thr
 - /spacy/parse
 This is the most important method. It works as an ApiRest web service.
 Receives a json with a text (and if you want, a language) and return all the relevant information.
-Return:
- A dictionary with the key "data" and value, the list of atributtes for each sentence.
- For each sentence, the spacy atributtes: start, end, start_char, end_char, text, text_with_ws, orth_, label, label_, lemma, ent_id, ent_id_, sentiment and, a list of nodes and a list of edges.
- For each node (word): text, text_with_ws, whitespace_, orth, orth_, head, left_edge, right_edge, i, ent_type, ent_type_, ent_iob, ent_iob_, ent_id, ent_id_, lemma, lemma_, norm, norm_, lower, shape, shape_, prefix, prefix_, suffix, suffix_, is_alpha, is_ascii, is_digit, is_lower, is_title, is_punct, is_left, is_left_punct, is_right_punct, is_space, is_bracket, is_quote, like_url, like_num, like_email, is_oov, is_stop, pos, pos_, tag, dep, dep_, lang, lang_, prob, idx, sentiment, lex_id, rank and cluster.
- For each edge (relation): parent, child and dep (Ej: ADJ,...)
+
+	Return:
+	- A dictionary with the key "data" and value, the list of atributtes for each sentence.
+ 
+ 	- For each sentence, the spacy atributtes: start, end, start_char, end_char, text, text_with_ws, orth_, label, label_, lemma, ent_id, ent_id_, sentiment and, a list of nodes and a list of edges.
+ 
+ 	- For each node (word): text, text_with_ws, whitespace_, orth, orth_, head, left_edge, right_edge, i, ent_type, ent_type_, ent_iob, ent_iob_, ent_id, ent_id_, lemma, lemma_, norm, norm_, lower, shape, shape_, prefix, prefix_, suffix, suffix_, is_alpha, is_ascii, is_digit, is_lower, is_title, is_punct, is_left, is_left_punct, is_right_punct, is_space, is_bracket, is_quote, like_url, like_num, like_email, is_oov, is_stop, pos, pos_, tag, dep, dep_, lang, lang_, prob, idx, sentiment, lex_id, rank and cluster.
+ 
+ 	- For each edge (relation): parent, child and dep (Ej: ADJ,...)
 
 - /spacy/set_language/<param>
 Change the server language to the one indicated by the parameter.
