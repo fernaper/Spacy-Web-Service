@@ -1,12 +1,16 @@
-# Spacy-Web-Service
+Spacy-Web-Service
+=================
 
-v1.0.2 - Release
+v1.1.0 - Release
 
 Made by: Fernando Pérez <fernaperg@gmail.com>
 
 Web Service that allows to perform all the Natural Language Processing (NLP) through the Spacy library without needing to have it installed or to program with python.
 
-   Allowed calls:
+Documentation
+-------------
+
+Allowed calls:
 	
 - /spacy/parse
 This is the most important method. It works as an ApiRest web service.
@@ -30,3 +34,17 @@ If you do not pass a phrase, it gives you back the last text that you passed spe
 
 - /spacy/get_tags
 It takes a json file with a phrase and returns each word with his tag.
+
+Requeriments
+------------
+We recommend using [conda](https://conda.io/docs/) to install all the dependencies in a virtual environment.
+
+- [Python](https://www.python.org/) >= 3.4
+- [SpaCy] (https://spacy.io/) 1.* < 2.0
+- [DocOpt] (http://docopt.org/) >= 0.6.2
+- [Bottle] (https://bottlepy.org/) >= 0.12.9
+
+Author
+------
+
+Fernando Pérez Gutiérrez <fernaperg@gmail.com>

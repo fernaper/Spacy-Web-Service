@@ -1,18 +1,36 @@
+'''
+Spacy web service.
+
+Usage:
+  Spacy_web_service.py [--app=<application>] [--server=<adapter>] [--host=<h>] [--port=<p>] [--reloader=<r>] [--interval=<i>] [--quiet=<q>] [--options=<o>] [--debug=<d>]
+  Spacy_web_service.py (-h | --help)
+
+Options:
+  -h --help              Show this screen.
+  --version              Show version.
+  --app=<application>    WSGI application or target string supported by load_app().[default: default_app()])
+  --server=<adapter>     Server adapter to use. See server_names keys for valid names or pass a ServerAdapter subclass. [default: wsgiref]
+  --host=<h>             Server address to bind to. Pass 0.0.0.0 to listens on all interfaces including the external one. [default: 127.0.0.1]
+  --port=<p>             Server port to bind to. Values below 1024 require root privileges. [default: 8080]
+  --reloader=<r>         Start auto-reloading server? [default: False]
+  --interval=<in>        Auto-reloader interval in seconds [default: 1]
+  --quiet=<q>            Suppress output to stdout and stderr? [default: False]
+  --options=<o>          Options passed to the server adapter.
+  --debug=<d>            Debug mode. [default: False]
+
+'''
+from docopt import docopt
 from bottle import run, get, post, request
 import spacy
 
 '''
     GLOBAL VARIABLES
 '''
-# Sometimes, it simply does this work unnecessarily, but when necessary it makes a quicker response
-lang = 'en'
-nlp = spacy.load(lang)
-parse = None
+lang = {}
 
 '''
     This is a method that works like an Api Rest.
-    It receives a json with the text you want to parse and, optionally, with
-    a language (if you do not send the language, it will use the last one).
+    It receives a json with the text you want to parse and a language.
     Returns a json with two lists, one of edges and one of nodes, as well as
     all the attributes that may be useful.
 '''
@@ -21,16 +39,17 @@ def parse():
     text = request.json.get('text')
     local_lang = request.json.get('lang')
     
-    # If yoy pass a new lang at the same time
-    if local_lang != None and local_lang != lang:
+    load = lang.get(local_lang)
+    if load != None:
+        nlp = load
+    else:
         try:
-            global nlp
             nlp = spacy.load(local_lang)
+            lang.update({local_lang:nlp})
         except:
-            pass
+            return {}
     
     try:
-        global parse
         parse = nlp(text)
     except:
         return {}
@@ -39,9 +58,12 @@ def parse():
     for tree in parse.sents:
         nodes = []
         edges = []
+        root = tree.root.i
         for word in tree:
-            edges.append({'parent': word.i, 'child':word.left_edge.i, 'dep':word.left_edge.dep_})
-            edges.append({'parent': word.i, 'child':word.right_edge.i, 'dep':word.right_edge.dep_})
+            if word.i != word.left_edge.i:
+                edges.append({'parent': word.i, 'child':word.left_edge.i, 'dep':word.left_edge.dep_})
+            if word.i != word.right_edge.i:
+                edges.append({'parent': word.i, 'child':word.right_edge.i, 'dep':word.right_edge.dep_})
             
             nodes_dict = {'text':word.text}
             nodes_dict.update({'text_with_ws':word.text_with_ws})
@@ -90,6 +112,7 @@ def parse():
             nodes_dict.update({'pos':word.pos})
             nodes_dict.update({'pos_':word.pos_})
             nodes_dict.update({'tag':word.tag})
+            nodes_dict.update({'tag_':word.tag_})
             nodes_dict.update({'dep':word.dep})
             nodes_dict.update({'dep_':word.dep_})
             nodes_dict.update({'lang':word.lang})
@@ -99,11 +122,12 @@ def parse():
             nodes_dict.update({'sentiment':word.sentiment})
             nodes_dict.update({'lex_id':word.lex_id})
             nodes_dict.update({'rank':word.rank})
-            nodes_dict.update({'cluster':word.cluster})            
+            nodes_dict.update({'cluster':word.cluster})
             nodes.append(nodes_dict)
         
         full = dict(nodes=nodes)
         full.update(dict(edges=edges))
+        full.update({'root':root})
     
         # I join all the dictionaries in one
         full.update({'start':tree.start})
@@ -144,73 +168,17 @@ def set_language(param):
         return {'data':False}
     
     lang = param;
-        
+    
     return {'data':True}
-
-'''
-    It takes a json file with a text and return thosw text separated into phrases.
-    
-    INPUT
-    Key: text
-    Valute: "..."
-    
-    OUTPUT
-    Key: data
-    Value: ["...", ... ,"..."]
-    
-    If you do not send a json or send an incorrect json, it returns {}.
-'''
-@post('/spacy/parse_text')
-def parse_text():
-    text = request.json.get('text')
-    try:
-        global parse
-        parse = nlp(text)
-    except:
-        parse = None
-            
-    return dict(data=[str(s) for s in list(parse.sents)]) if parse != None else {}
-
-
-'''
-    Returns the previously parsed text
-'''
-@get('/spacy/parse_text')
-def parsed_text():
-    return dict(data=[str(s) for s in list(parse.sents)]) if parse != None else {}
-
-'''
-    It takes a json file with a phrase and returns each word with his tag.
-    
-    INPUT
-    Key: text
-    Valute: "..."
-    
-    OUTPUT
-    Key: each word
-    Value: what tag
-'''
-@post('/spacy/get_tags')
-def get_tags():
-    text = request.json.get('text')
-    global parse
-    parse = nlp(text)
-    ans = {}
-    for word in list(parse.sents)[0]:
-        ans.update({str(word):str(word.tag_)})
-    
-    return ans if ans != None else {}
-
-@get('/spacy/get_tags')
-def get_current_tags():
-    ans = {}
-    if parse != None:
-        for word in list(parse.sents)[0]:
-            ans.update({str(word):str(word.tag_)})
-    return ans
 
 '''
     Main
 '''
 if __name__ == "__main__":
-    run(host='localhost', port=8080, debug=True, reloader=True)
+    arguments = docopt(__doc__)
+    
+    # We can not specify the app parameter
+    run(server=arguments.get('--server'),
+        host=arguments.get('--host'), port=arguments.get('--port'),
+        reloader=arguments.get('--reloader')=='True', interval=int(arguments.get('--interval')),
+        quiet=arguments.get('--quiet')=='True',debug=arguments.get('--debug')=='True')
