@@ -40,9 +40,9 @@ Requeriments
 We recommend using [conda](https://conda.io/docs/) to install all the dependencies in a virtual environment.
 
 - [Python](https://www.python.org/) >= 3.4
-- [SpaCy] (https://spacy.io/) 1.* < 2.0
-- [DocOpt] (http://docopt.org/) >= 0.6.2
-- [Bottle] (https://bottlepy.org/) >= 0.12.9
+- [SpaCy](https://spacy.io/) 1.* < 2.0
+- [DocOpt](http://docopt.org/) >= 0.6.2
+- [Bottle](https://bottlepy.org/) >= 0.12.9
 
 Author
 ------
